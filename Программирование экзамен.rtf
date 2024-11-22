@@ -1,0 +1,946 @@
+{\rtf1\ansi\ansicpg1251\cocoartf2821
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red255\green255\blue255;\red231\green235\blue241;
+\red35\green39\blue49;\red255\green255\blue255;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c100000\c100000\c100000;\csgenericrgb\c90588\c92157\c94510;
+\csgenericrgb\c13725\c15294\c19216;\csgray\c100000;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww21580\viewh12800\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 #1\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 #include <iostream>\
+#include <iomanip>\
+using namespace std;\
+\
+namespace temperature \{\
+	enum Scales\
+	\{\
+		Celsius,\
+		Fahrenheit\
+	\};\
+	class Temperature\
+	\{\
+	private:\
+		double degrees;\
+		Scales scale;\
+	public:\
+		Temperature(double dgr = 0, Scales scl = Celsius)\
+		\{\
+			degrees = dgr;\
+			scale = scl;\
+		\}\
+\
+		double getInCels() const\
+		\{\
+			return scale == Celsius ? degrees : (degrees - 32) * 5 / 9;\
+		\}\
+		double getInFahr() const\
+		\{\
+			return scale == Fahrenheit ? degrees : 32 + degrees * 1.8;\
+		\}\
+\
+		Temperature operator-(const Temperature& secTemper) const\
+		\{\
+			return Temperature(this->getInCels() - secTemper.getInCels(), Celsius);\
+		\}\
+		void operator-=(const Temperature& secTemper)\
+		\{\
+			*this = Temperature(this->getInCels() - secTemper.getInCels(), Celsius);\
+		\}\
+		Temperature operator+(const Temperature& secTemper) const\
+		\{\
+			return Temperature(this->getInCels() + secTemper.getInCels(), Celsius);\
+		\}\
+		void operator+=(const Temperature& secTemper)\
+		\{\
+			*this = Temperature(this->getInCels() + secTemper.getInCels(), Celsius);\
+		\}\
+		Temperature operator*(const double val) const\
+		\{\
+			return Temperature(this->getInCels() * val, Celsius);\
+		\}\
+		void operator*=(const double val)\
+		\{\
+			*this = Temperature(this->getInCels() * val, Celsius);\
+		\}\
+		Temperature operator/(const double val) const\
+		\{\
+			return Temperature(this->getInCels() / val, Celsius);\
+		\}\
+		void operator/=(const double val)\
+		\{\
+			*this = Temperature(this->getInCels() / val, Celsius);\
+		\}\
+\
+		friend ostream& operator<<(ostream& out, const Temperature& temper)\
+		\{\
+			return out << fixed << setprecision(1) << temper.degrees << (temper.scale == Celsius ? "^0C" : "^0F") << endl;\
+		\}\
+	\};\
+\}\
+\
+using namespace temperature;\
+int main()\
+\{\
+	Temperature first(18.3, Celsius), second(451, Fahrenheit);\
+	cout << first + second;\
+	cout << first * 2;\
+	return 0;\
+\}\
+////////////////////////////////////////////////////////////////////////////////\
+#2\
+#include <iostream>\
+using namespace std;\
+\
+class Matrix\
+\{\
+private:\
+	int rows, columns;\
+	double** values;\
+public:\
+	Matrix(double rws = 1, double clm = 1)\
+	\{\
+		rows = rws;\
+		columns = clm;\
+		values = new double* [clm] \{\};\
+		for (int i = 0; i < clm; i++)\
+			values[i] = new double[rws] \{\};\
+	\}\
+	~Matrix()\
+	\{\
+		for (int i = 0; i < columns; i++)\
+			delete[] values[i];\
+		delete[] values;\
+	\}\
+	Matrix operator*(const Matrix& secMtrx)\
+	\{\
+		if (columns == secMtrx.rows)\
+		\{\
+			Matrix newMtrx(rows, secMtrx.columns);\
+			for (int i = 0; i < secMtrx.columns; i++)\
+				for (int j = 0; j < rows; j++)\
+					for (int k = 0; k < columns; k++)\
+						newMtrx.values[i][j] += this->values[k][j] * secMtrx.values[i][k];\
+			return newMtrx;\
+		\}\
+		else\
+			throw invalid_argument("Columns of first matrix must equals rows of second to multiply them!");\
+	\}\
+\
+	friend istream& operator >>(istream& in, Matrix mtrx)\
+	\{\
+		cout << "Matrix (" << mtrx.rows << " * " << mtrx.columns << "). Enter values in rows with space as separator : " << endl;\
+		for (int i = 0; i < mtrx.rows; i++)\
+		\{\
+			cout << i + 1 << ": ";\
+			for (int j = 0; j < mtrx.columns; j++)\
+			\{\
+				in >> mtrx.values[j][i];\
+			\}\
+		\}\
+		return in;\
+	\}\
+	friend ostream& operator <<(ostream& out, Matrix mtrx)\
+	\{\
+		for (int i = 0; i < mtrx.rows; i++)\
+		\{\
+			for (int j = 0; j < mtrx.columns; j++)\
+				out << mtrx.values[j][i] << " ";\
+			out << endl;\
+		\}\
+		return out;\
+	\}\
+\};\
+\
+int main()\
+\{\
+	try \{\
+		Matrix a(2, 3), b(4, 3);\
+		cin >> a >> b;\
+		cout << a << "*\\n" << b << "=\\n" << a * b;\
+		return 0;\
+	\}\
+	catch (const invalid_argument& ex)\
+	\{\
+		cerr << ex.what() << endl;\
+		return -1;\
+	\}\
+\}\
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\
+#3\
+#include <iostream>\
+using namespace std;\
+\
+double bisection(double a, double b, double prec, double (*f)(double))\
+\{\
+	double c = (a + b) / 2;\
+	while (b - a > prec)\
+	\{\
+		c = (a + b) / 2;\
+		if (f(a) * f(c) < 0)\
+			b = c;\
+		else\
+			a = c;\
+	\}\
+	return c;\
+\}\
+\
+double f(double x)\
+\{\
+	return x*x + sin(x) - 2;\
+\}\
+\
+int main()\
+\{\
+	double a = -2, b = -1, prec = 0.01;\
+	cout << "The root of f(x)=0 is: " << bisection(a, b, prec, f) << endl;\
+\}\
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\
+#4\
+#include <iostream>\
+using namespace std;\
+\
+namespace numbers \{\
+	enum Formats \{\
+		binar = 2,\
+		octal = 8,\
+		decim = 10,\
+		hexad = 16\
+	\};\
+	class UnsIntNums \{\
+		unsigned int value;\
+		Formats format;\
+	public:\
+		UnsIntNums(int val = 0, Formats fmt = decim)\
+		\{\
+			if (val < 0)\
+				throw underflow_error("Value must be unsigned!");\
+			char buff[11];\
+			sprintf(buff,"%u",val);\
+			value = strtol(buff, 0, (int)fmt);\
+			format = fmt;\
+		\}\
+\
+		UnsIntNums operator+(const UnsIntNums& secNum) const\
+		\{\
+			return UnsIntNums(value + secNum.value, format);\
+		\}\
+		void operator+=(const UnsIntNums& secNum)\
+		\{\
+			*this = UnsIntNums(value + secNum.value, format);\
+		\}\
+		UnsIntNums operator-(const UnsIntNums& secNum) const\
+		\{\
+			int newVal = value - secNum.value;\
+			if (newVal < 0)\
+				throw underflow_error("Value must be unsigned!");\
+			return UnsIntNums(newVal, format);\
+		\}\
+		void operator-=(const UnsIntNums& secNum)\
+		\{\
+			int newVal = value - secNum.value;\
+			if (newVal < 0)\
+				throw underflow_error("Value must be unsigned!");\
+			*this = UnsIntNums(newVal, format);\
+		\}\
+		UnsIntNums operator*(const UnsIntNums& secNum) const\
+		\{\
+			return UnsIntNums(value * secNum.value, format);\
+		\}\
+		void operator*=(const UnsIntNums& secNum)\
+		\{\
+			*this = UnsIntNums(value * secNum.value, format);\
+		\}\
+		UnsIntNums operator/(const UnsIntNums& secNum) const\
+		\{\
+			if (secNum.value == 0)\
+				throw logic_error("Division by zero!");\
+			return UnsIntNums(value / secNum.value, format);\
+		\}\
+		void operator/=(const UnsIntNums& secNum)\
+		\{\
+			if (secNum.value == 0)\
+				throw logic_error("Division by zero!");\
+			*this = UnsIntNums(value / secNum.value, format);\
+		\}\
+\
+		friend ostream& operator << (ostream& out, const UnsIntNums& num)\
+		\{\
+			char buff[11];\
+			return out << _itoa(num.value, buff, (int)num.format);\
+		\}\
+	\};\
+\}\
+\
+using namespace numbers;\
+int main()\
+\{\
+	try \{\
+		UnsIntNums a(10, octal), b(11,binar);\
+		cout << a + b << endl;\
+		return 0;\
+	\}\
+	catch (exception& ex) \{\
+		cout << endl << ex.what() << endl;\
+		return -1;\
+	\}\
+\}\
+/////////////////////////////////////////////////////////////////////////////////////////////////////\
+#5\
+#include <iostream>\
+#include <malloc.h>\
+using namespace std;\
+\
+class primeNums\
+\{\
+private:\
+	int minimum;\
+	int maximum;\
+	int* nums;\
+public:\
+	primeNums(int min = 0, int max = 1)\
+	\{\
+		if (min > max || min <= 0)\
+			throw invalid_argument("Incorrect input!");\
+		int cnt = 0;\
+		for (int i = min; i < max; i++)\
+		\{\
+			int flag = 1;\
+			for (int j = 2; j <= (int)sqrt(i); j++)\
+				if (i % j == 0)\
+				\{\
+					flag = 0;\
+					break;\
+				\}\
+			if (flag)\
+			\{\
+				nums = (int*)realloc(nums, sizeof(int) * ++cnt);\
+				nums[cnt - 1] = i;\
+			\}\
+		\}\
+		minimum = min;\
+		maximum = max;\
+	\}\
+	~primeNums()\
+	\{\
+		free(nums);\
+	\}\
+	void isPrime()\
+	\{\
+		int x;\
+		do \{\
+			cout << "Enter the number for search: ";\
+			cin >> x;\
+		\} while (x <= 0);\
+		for (int i = 0; i < cntOfElems(); i++)\
+			if (x == nums[i])\
+			\{\
+				cout << "This number is prime!" << endl;\
+				return;\
+			\}\
+		cout << "This number is not prime!" << endl;\
+	\}\
+	int cntOfElems()\
+	\{\
+		int cnt = 0;\
+		for (int i = minimum; i < maximum; i++)\
+		\{\
+			int flag = 1;\
+			for (int j = 2; j <= (int)sqrt(i); j++)\
+				if (i % j == 0)\
+				\{\
+					flag = 0;\
+					break;\
+				\}\
+			if (flag)\
+				cnt++;\
+		\}\
+		return cnt;\
+	\}\
+\};\
+\
+int main()\
+\{\
+	try\
+	\{\
+		primeNums a(1, 100);\
+		cout << "Count of prime values in range: " << a.cntOfElems() << endl;\
+		a.isPrime();\
+		return 0;\
+	\}\
+	catch (const exception& ex)\
+	\{\
+		cerr << ex.what() << endl;\
+		return -1;\
+	\}\
+\}\
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\
+#6\
+#include <iostream>\
+using namespace std;\
+\
+namespace weights \{\
+	enum Measures\
+	\{\
+		gram,\
+		kilogram,\
+		hundredweight,\
+		tonne\
+	\};\
+	class Weight\
+	\{\
+		double weight;\
+		Measures measure;\
+	public:\
+		Weight(int w = 1, Measures m = kilogram) \{\
+			if (w < 0)\
+				throw invalid_argument("Incorrect weight!");\
+			weight = w;\
+			measure = m;\
+		\}\
+\
+		Weight operator+(const Weight& other) const\
+		\{\
+			return Weight(weight + other.weight, measure);\
+		\}\
+		void operator+=(const Weight& other) \
+		\{\
+			*this =  Weight(weight + other.weight, measure);\
+		\}\
+		Weight operator-(const Weight& other) const\
+		\{\
+			return Weight(weight - other.weight, measure);\
+		\}\
+		void operator-=(const Weight& other) \
+		\{\
+			*this = Weight(weight - other.weight, measure);\
+		\}\
+\
+		friend ostream& operator<<(ostream& out, const Weight& obj)\
+		\{\
+			switch (obj.measure)\
+			\{\
+			case gram:\
+				out << obj.weight * 1000 << " gram" << endl;\
+				break;\
+			case kilogram:\
+				out << obj.weight << " kilogram" << endl;\
+				break;\
+			case hundredweight:\
+				out << obj.weight / 100 << " hundredweight" << endl;\
+				break;\
+			case tonne:\
+				out << obj.weight / 1000 << " ton" << endl;\
+				break;\
+			\}\
+			return out;\
+		\}\
+	\};\
+\}\
+\
+using namespace weights;\
+int main() \{\
+	try\
+	\{\
+		Weight a(12, gram);\
+		cout << "a: " << a << endl;\
+		Weight b(200, kilogram);\
+		cout << "b: " << b << endl;\
+		Weight c = a + b;\
+		cout << "c: " << c << endl;\
+		Weight d = b - a;\
+		cout << "d: " << d << endl;\
+		Weight h1(a), h2(12, kilogram), h3(12, hundredweight), h4(12, tonne);\
+		cout << "__________________________" << endl;\
+		cout << "h1: " << h1 << endl;\
+		cout << "h2: " << h2 << endl;\
+		cout << "h3: " << h3 << endl;\
+		cout << "h4: " << h4 << endl;\
+		return 0;\
+	\}\
+	catch (const exception& ex)\
+	\{\
+		cerr << ex.what() << endl;\
+		return -1;\
+	\}\
+\}\
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////\
+#7\
+#include <iostream>\
+#include <cmath>\
+using namespace std;\
+\
+namespace triangles \{\
+	double calcDist(double x1, double y1, double x2, double y2)\
+	\{\
+		return sqrt((x1 - x2) * (x1-x2) + (y1 - y2) * (y1 - y2));\
+	\}\
+	void isTriangValid(double x1, double y1, double x2, double y2, double x3, double y3) \
+	\{\
+		double a = calcDist(x1, y1, x2, y2);\
+		double b = calcDist(x1, y1, x3, y3);\
+		double c = calcDist(x2, y2, x3, y3);\
+		if (!((a + b > c) && (a + c > b) && (b + c > a)))\
+			throw invalid_argument("Invalid triangle!");\
+	\}\
+	class Triangle \{\
+	private:\
+		double pointA[2];\
+		double pointB[2];\
+		double pointC[2];\
+		double ab;\
+		double ac;\
+		double bc;\
+	public:\
+		Triangle(double x1, double y1, double x2, double y2, double x3, double y3)\
+		\{\
+			isTriangValid(x1,y1,x2,y2,x3,y3);\
+			pointA[0] = x1;\
+			pointA[1] = y1;\
+			pointB[0] = x2;\
+			pointB[1] = y2;\
+			pointC[0] = x3;\
+			pointC[1] = y3;\
+			ab = calcDist(pointA[0], pointA[1],pointB[0], pointB[1]);\
+			ac = calcDist(pointA[0], pointA[1], pointC[0], pointC[1]);\
+			bc = calcDist(pointB[0], pointB[1], pointC[0], pointC[1]);\
+		\}\
+\
+		double calculatePerimeter() \
+		\{\
+			return ab + ac + bc;\
+		\}\
+		double calculateArea() \{ // \uc0\u1057 \'84\u1056 \u1109 \u1057 \u1026 \u1056 \u1112 \u1057 \u1107 \u1056 \'bb\u1056 \'b0 \u1056 \'93\u1056 \'b5\u1057 \u1026 \u1056 \u1109 \u1056 \u1029 \u1056 \'b0\
+			double s = calculatePerimeter() / 2;\
+			return sqrt(s * (s - ab) * (s - ac) * (s - bc));\
+		\}\
+	\};\
+\}\
+using namespace triangles;\
+int main()\
+\{\
+	try \{\
+		Triangle triangle(3, 6, 2, 3, -2, -5);\
+		cout << "Perimeter: " << triangle.calculatePerimeter() << endl;\
+		cout << "Area: " << triangle.calculateArea() << endl;\
+		return 0;\
+	\}\
+	catch (const exception& ex) \{\
+		cerr << ex.what() << endl;\
+		return -1;\
+	\}\
+\}\
+/////////////////////////////////////////////////////////////////////////////////////////////////////////\
+#8\
+#include <iostream>\
+using namespace std;\
+\
+class RandInRange \{\
+private:\
+	int maximum;\
+	int minimum;\
+public:\
+	RandInRange(int specOfGen, int max = 1, int min = 0)\
+	\{\
+		if (maximum < minimum)\
+			throw invalid_argument("Upper limit should be more than lower!");\
+		srand(specOfGen);\
+		maximum = max;\
+		minimum = min;\
+	\}\
+	int getInt() const \
+	\{\
+		return minimum + rand() % (maximum - minimum + 1);\
+	\}\
+	int getLng() const\
+	\{\
+		return minimum + (long)rand() % (maximum - minimum + 1);\
+	\}\
+	double getFlt() const\
+	\{\
+		return minimum + (float)rand() / RAND_MAX * (maximum - minimum);\
+	\}\
+	double getDbl() const\
+	\{\
+		return minimum + (double)rand() / RAND_MAX * (maximum - minimum);\
+	\}\
+\};\
+\
+int main()\
+\{\
+	try \{\
+		RandInRange a(time(NULL), 2, 25);\
+		cout << a.getFlt() << " " << a.getDbl() << endl;\
+		RandInRange b(12, 4, 9);\
+		cout << b.getInt() << " " << b.getLng() << endl;\
+		return 0;\
+	\}\
+	catch (const exception& ex)\
+	\{\
+		cerr << ex.what() << endl;\
+		return -1;\
+	\}\
+\}\
+////////////////////////////////////////////////////////////////////////////////////////////////\
+#9\
+#include <iostream>\
+using namespace std;\
+\
+void kramerMethod2x(double coeff[2][3], double& x1, double& x2)\
+\{\
+    double delta = coeff[0][0] * coeff[1][1] - coeff[0][1] * coeff[1][0];\
+    if (!delta)\
+        throw runtime_error("System cannot be solved with Kramer's method!");\
+    double delta_x1 = coeff[0][2] * coeff[1][1] - coeff[0][1] * coeff[1][2];\
+    double delta_x2 = coeff[0][0] * coeff[1][2] - coeff[1][0] * coeff[0][2];\
+    x1 = delta_x1 / delta;\
+    x2 = delta_x2 / delta;\
+\}\
+void gaussMethod2x(double coeff[2][3], double& x1, double& x2)\
+\{\
+    for (int i = 0; i < 2; i++)\
+    \{\
+        double tmp = coeff[i][i];\
+        for (int j = 2; j >= i; j--)\
+            coeff[i][j] /= tmp;\
+        for (int k = i + 1; k < 2; k++)\
+        \{\
+            tmp = coeff[k][i];\
+            for (int l = 2; l >= i; l--)\
+                coeff[k][l] -= tmp * coeff[i][l];\
+        \}\
+        if (!coeff[1][1] && (coeff[1][2] != 0 || !coeff[1][0] && !coeff[1][2]))\
+            throw runtime_error("System cannot be solved with Gauss's method!");\
+    \}\
+    x1 = coeff[1][2];\
+    x2 = coeff[0][2] - coeff[0][1] * x1;\
+\}\
+\
+int main()\
+\{\
+    double coeff[2][3] = \
+    \{\
+        \{ 1, 1, 2 \},\
+        \{ 1, 1, 2 \}\
+    \};\
+    double x1, x2;\
+    try \
+    \{\
+        kramerMethod2x(coeff, x1, x2);\
+        cout << "x1:" << x1 << " x2:" << x2 << endl;\
+        gaussMethod2x(coeff, x1, x2);\
+        cout << "x1:" << x1 << " x2:" << x2 << endl;\
+        return 0;\
+    \}\
+    catch (const exception& ex)\
+    \{\
+        cerr << ex.what() << endl;\
+        return -1;\
+    \}\
+\}\
+////////////////////////////////////////////////////////////////////////////////////////////////////////\
+#10\
+#include <iostream>\
+#include <iomanip>\
+using namespace std;\
+\
+namespace speeds \{\
+	enum Measures\
+	\{\
+		m_s,\
+		km_h\
+	\};\
+	class Speed\
+	\{\
+	private:\
+		double speed;\
+		Measures measure;\
+	public:\
+		Speed(double s = 1, Measures m = m_s)\
+		\{\
+			speed = s;\
+			measure = m;\
+		\}\
+\
+		double getInM_s() const\
+		\{\
+			return measure == m_s ? speed : speed * 5 / 18;\
+		\}\
+\
+		Speed operator-(const Speed& secSpeed) const\
+		\{\
+			return Speed(getInM_s() - secSpeed.getInM_s(), m_s);\
+		\}\
+		void operator-=(const Speed& secSpeed) \
+		\{\
+			*this = Speed(getInM_s() - secSpeed.getInM_s(), m_s);\
+		\}\
+		Speed operator+(const Speed& secSpeed) const\
+		\{\
+			return Speed(getInM_s() + secSpeed.getInM_s(), m_s);\
+		\}\
+		void operator+=(const Speed& secSpeed) \
+		\{\
+			*this = Speed(getInM_s() + secSpeed.getInM_s(), m_s);\
+		\}\
+		Speed operator*(const double val) const\
+		\{\
+			if (!val)\
+				throw logic_error("Divide by zero!");\
+			return Speed(speed * val, measure);\
+		\}\
+		void operator*=(const double val)\
+		\{\
+			if (!val)\
+				throw logic_error("Divide by zero!");\
+			*this = Speed(speed * val, measure);\
+		\}\
+		Speed operator/(const double val) const\
+		\{\
+			if (!val)\
+				throw logic_error("Divide by zero!");\
+			return Speed(speed / val, measure);\
+		\}\
+		void operator/=(const double val)\
+		\{\
+			if (!val)\
+				throw logic_error("Divide by zero!");\
+			*this = Speed(speed / val, measure);\
+		\}\
+		\
+		friend ostream& operator<<(ostream& out, const Speed obj)\
+		\{\
+			return out << fixed << setprecision(2) << obj.speed << (obj.measure == m_s ? " m/s" : " km/h") << endl;\
+		\}\
+	\};\
+\}\
+\
+using namespace speeds;\
+int main()\
+\{\
+	try \{\
+		Speed a(15, m_s), b(90, km_h);\
+		cout << a + b;\
+		cout << a / 0;\
+		return 0;\
+	\}\
+	catch (const exception& ex)\
+	\{\
+		cerr << ex.what() << endl;\
+		return -1;\
+	\}\
+\}\
+////////////////////////////////////////////////////////////////\
+#11\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+\cf3 \cb2 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 #include <iostream>\
+\
+double findExtremum(double (*f)(double), double left, double right, double epsilon) \{\
+    while (right - left > epsilon) \{\
+        double third = (right - left) / 3.0;\
+        double mid1 = left + third;\
+        double mid2 = right - third;\
+\
+        if (f(mid1) < f(mid2)) \{\
+            right = mid2; // \uc0\u1057 \u1091 \u1078 \u1072 \u1077 \u1084  \u1087 \u1088 \u1072 \u1074 \u1091 \u1102  \u1095 \u1072 \u1089 \u1090 \u1100 \
+        \} else \{\
+            left = mid1; // \uc0\u1057 \u1091 \u1078 \u1072 \u1077 \u1084  \u1083 \u1077 \u1074 \u1091 \u1102  \u1095 \u1072 \u1089 \u1090 \u1100 \
+        \}\
+    \}\
+    return (left + right) / 2.0; // \uc0\u1042 \u1086 \u1079 \u1074 \u1088 \u1072 \u1097 \u1072 \u1077 \u1084  \u1089 \u1077 \u1088 \u1077 \u1076 \u1080 \u1085 \u1091  \u1080 \u1085 \u1090 \u1077 \u1088 \u1074 \u1072 \u1083 \u1072 \
+\}\
+\
+double function(double x) \{\
+    return x * x - 4 * x + 4; // \uc0\u1055 \u1088 \u1080 \u1084 \u1077 \u1088 : f(x) = x^2 - 4x + 4 (\u1101 \u1082 \u1089 \u1090 \u1088 \u1077 \u1084 \u1091 \u1084  \u1074  x = 2)\
+\}\
+\
+int main() \{\
+    // \uc0\u1047 \u1072 \u1076 \u1072 \u1077 \u1084  \u1080 \u1085 \u1090 \u1077 \u1088 \u1074 \u1072 \u1083  \u1087 \u1086 \u1080 \u1089 \u1082 \u1072 , \u1090 \u1086 \u1095 \u1085 \u1086 \u1089 \u1090 \u1100 , \u1080  \u1092 \u1091 \u1085 \u1082 \u1094 \u1080 \u1102 \
+    double left = 0, right = 5, epsilon = 1e-6;\
+\
+    // \uc0\u1048 \u1089 \u1087 \u1086 \u1083 \u1100 \u1079 \u1091 \u1077 \u1084  \u1084 \u1077 \u1090 \u1086 \u1076  \u1076 \u1077 \u1083 \u1077 \u1085 \u1080 \u1103  \u1085 \u1072  \u1090 \u1088 \u1080  \u1095 \u1072 \u1089 \u1090 \u1080  \u1076 \u1083 \u1103  \u1085 \u1072 \u1093 \u1086 \u1078 \u1076 \u1077 \u1085 \u1080 \u1103  \u1084 \u1080 \u1085 \u1080 \u1084 \u1091 \u1084 \u1072 \
+    double extremum = findExtremum(function, left, right, epsilon);\
+\
+    // \uc0\u1042 \u1099 \u1074 \u1086 \u1076 \u1080 \u1084  \u1088 \u1077 \u1079 \u1091 \u1083 \u1100 \u1090 \u1072 \u1090 \
+    std::cout << "\uc0\u1069 \u1082 \u1089 \u1090 \u1088 \u1077 \u1084 \u1091 \u1084  \u1092 \u1091 \u1085 \u1082 \u1094 \u1080 \u1080  \u1085 \u1072 \u1093 \u1086 \u1076 \u1080 \u1090 \u1089 \u1103  \u1074  \u1090 \u1086 \u1095 \u1082 \u1077  x = " << extremum << std::endl;\
+    std::cout << "\uc0\u1047 \u1085 \u1072 \u1095 \u1077 \u1085 \u1080 \u1077  \u1092 \u1091 \u1085 \u1082 \u1094 \u1080 \u1080  \u1074  \u1101 \u1090 \u1086 \u1081  \u1090 \u1086 \u1095 \u1082 \u1077 : f(x) = " << function(extremum) << std::endl;\
+\
+    return 0;\
+\}\
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////\cf4 \cb5 \
+\cf2 \cb6 #12\
+\pard\pardeftab720\partightenfactor0
+\cf0 \cb1 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 #define _USE_MATH_DEFINES\
+#include <iostream>\
+using namespace std;\
+\
+double rectangleMethod(double a, double b, int n, double(*f)(double))\
+\{\
+    double h = (b - a) / n, res = 0;\
+    for (int i = 0; i < n; i++)\
+        res += f(a + h/2 + i * h);\
+    return res *= h;\
+\}\
+\
+double f(double x)\
+\{\
+    return (sin(x));\
+\}\
+    \
+int main()\
+\{   \
+    cout << rectangleMethod(0,M_PI,1000,f) << endl;\
+    return 0;\
+\}\
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////\
+#13\
+#include <iostream>\
+using namespace std;\
+\
+\
+void getRoots(double a, double b, double c, double& root1, double& root2) \{\
+    double d = b * b - 4 * a * c;\
+    if (d > 0) \{\
+        root1 = (-b + sqrt(d)) / (2 * a);\
+        root2 = (-b - sqrt(d)) / (2 * a);\
+    \}\
+    else if (d == 0) \{\
+        root1 = root2 = -b / (2 * a);\
+    \}\
+    else \{\
+        throw runtime_error("No roots in R (d<0)!");\
+    \}\
+\}\
+\
+int main() \{\
+    double a, b, c, root1, root2;;\
+    cout << "Enter the coefficients of the quadratic equation (ax^2 + bx + c = 0):" << endl;\
+    cout << "a: ";\
+    cin >> a;\
+    cout << "b: ";\
+    cin >> b;\
+    cout << "c: ";\
+    cin >> c;\
+    try \{\
+        getRoots(a, b, c, root1, root2);\
+    \}\
+    catch (const exception& e) \{\
+        cout << e.what() << endl;\
+        return -1;\
+    \}\
+    cout << "Roots of the equation: " << root1 << ", " << root2 << endl;\
+    return 0;\
+\}\
+/////////////////////////////////////////////////////////////////////////////////////////////\
+#14\
+#include <iostream>\
+#include <vector>\
+#include <limits>\
+\
+template <typename T>\
+void findIndices(const std::vector<T>& array, bool findMax, std::vector<size_t>& indices) \{\
+    if (array.empty()) \{\
+        indices.clear();\
+        return;\
+    \}\
+\
+    T extreme = findMax ? std::numeric_limits<T>::lowest() : std::numeric_limits<T>::max();\
+    indices.clear();\
+\
+    // \uc0\u1053 \u1072 \u1093 \u1086 \u1076 \u1080 \u1084  \u1101 \u1082 \u1089 \u1090 \u1088 \u1077 \u1084 \u1072 \u1083 \u1100 \u1085 \u1086 \u1077  \u1079 \u1085 \u1072 \u1095 \u1077 \u1085 \u1080 \u1077 \
+    for (const auto& value : array) \{\
+        if ((findMax && value > extreme) || (!findMax && value < extreme)) \{\
+            extreme = value;\
+        \}\
+    \}\
+\
+    // \uc0\u1053 \u1072 \u1093 \u1086 \u1076 \u1080 \u1084  \u1074 \u1089 \u1077  \u1080 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1089  \u1101 \u1082 \u1089 \u1090 \u1088 \u1077 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1084  \u1079 \u1085 \u1072 \u1095 \u1077 \u1085 \u1080 \u1077 \u1084 \
+    for (size_t i = 0; i < array.size(); ++i) \{\
+        if (array[i] == extreme) \{\
+            indices.push_back(i);\
+        \}\
+    \}\
+\}\
+\
+int main() \{\
+    std::vector<int> array = \{3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5\};\
+\
+    std::vector<size_t> indices;\
+\
+    // \uc0\u1053 \u1072 \u1081 \u1090 \u1080  \u1080 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1084 \u1080 \u1085 \u1080 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1093  \u1079 \u1085 \u1072 \u1095 \u1077 \u1085 \u1080 \u1081 \
+    findIndices(array, false, indices);\
+    std::cout << "\uc0\u1048 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1084 \u1080 \u1085 \u1080 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1093  \u1101 \u1083 \u1077 \u1084 \u1077 \u1085 \u1090 \u1086 \u1074 : ";\
+    for (size_t index : indices) \{\
+        std::cout << index << " ";\
+    \}\
+    std::cout << "\\n";\
+\
+    // \uc0\u1053 \u1072 \u1081 \u1090 \u1080  \u1080 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1084 \u1072 \u1082 \u1089 \u1080 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1093  \u1079 \u1085 \u1072 \u1095 \u1077 \u1085 \u1080 \u1081 \
+    findIndices(array, true, indices);\
+    std::cout << "\uc0\u1048 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1084 \u1072 \u1082 \u1089 \u1080 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1093  \u1101 \u1083 \u1077 \u1084 \u1077 \u1085 \u1090 \u1086 \u1074 : ";\
+    for (size_t index : indices) \{\
+        std::cout << index << " ";\
+    \}\
+    std::cout << "\\n";\
+\
+    return 0;\
+\}\
+- \'97\'97\'97 \'97\'97  \'97  - - - -  - - - \'97 - - - - - - - - - - - - - - - - - - - -\
+#include <stdio.h>\
+#include <limits.h>\
+\
+void findIndices(const int *array, int size, int findMax, int *indices, int *count) \{\
+    if (size <= 0) \{\
+        *count = 0;\
+        return;\
+    \}\
+\
+    int extreme = findMax ? INT_MIN : INT_MAX;\
+    *count = 0;\
+\
+    // \uc0\u1053 \u1072 \u1093 \u1086 \u1076 \u1080 \u1084  \u1101 \u1082 \u1089 \u1090 \u1088 \u1077 \u1084 \u1072 \u1083 \u1100 \u1085 \u1086 \u1077  \u1079 \u1085 \u1072 \u1095 \u1077 \u1085 \u1080 \u1077 \
+    for (int i = 0; i < size; i++) \{\
+        if ((findMax && array[i] > extreme) || (!findMax && array[i] < extreme)) \{\
+            extreme = array[i];\
+        \}\
+    \}\
+\
+    // \uc0\u1053 \u1072 \u1093 \u1086 \u1076 \u1080 \u1084  \u1074 \u1089 \u1077  \u1080 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1089  \u1101 \u1082 \u1089 \u1090 \u1088 \u1077 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1084  \u1079 \u1085 \u1072 \u1095 \u1077 \u1085 \u1080 \u1077 \u1084 \
+    for (int i = 0; i < size; i++) \{\
+        if (array[i] == extreme) \{\
+            indices[*count] = i;\
+            (*count)++;\
+        \}\
+    \}\
+\}\
+\
+int main() \{\
+    int array[] = \{3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5\};\
+    int size = sizeof(array) / sizeof(array[0]);\
+\
+    int indices[size]; // \uc0\u1052 \u1072 \u1089 \u1089 \u1080 \u1074  \u1076 \u1083 \u1103  \u1093 \u1088 \u1072 \u1085 \u1077 \u1085 \u1080 \u1103  \u1080 \u1085 \u1076 \u1077 \u1082 \u1089 \u1086 \u1074 \
+    int count;\
+\
+    // \uc0\u1053 \u1072 \u1081 \u1090 \u1080  \u1080 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1084 \u1080 \u1085 \u1080 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1093  \u1079 \u1085 \u1072 \u1095 \u1077 \u1085 \u1080 \u1081 \
+    findIndices(array, size, 0, indices, &count);\
+    printf("\uc0\u1048 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1084 \u1080 \u1085 \u1080 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1093  \u1101 \u1083 \u1077 \u1084 \u1077 \u1085 \u1090 \u1086 \u1074 : ");\
+    for (int i = 0; i < count; i++) \{\
+        printf("%d ", indices[i]);\
+    \}\
+    printf("\\n");\
+\
+    // \uc0\u1053 \u1072 \u1081 \u1090 \u1080  \u1080 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1084 \u1072 \u1082 \u1089 \u1080 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1093  \u1079 \u1085 \u1072 \u1095 \u1077 \u1085 \u1080 \u1081 \
+    findIndices(array, size, 1, indices, &count);\
+    printf("\uc0\u1048 \u1085 \u1076 \u1077 \u1082 \u1089 \u1099  \u1084 \u1072 \u1082 \u1089 \u1080 \u1084 \u1072 \u1083 \u1100 \u1085 \u1099 \u1093  \u1101 \u1083 \u1077 \u1084 \u1077 \u1085 \u1090 \u1086 \u1074 : ");\
+    for (int i = 0; i < count; i++) \{\
+        printf("%d ", indices[i]);\
+    \}\
+    printf("\\n");\
+\
+    return 0;\
+\}\
+}
